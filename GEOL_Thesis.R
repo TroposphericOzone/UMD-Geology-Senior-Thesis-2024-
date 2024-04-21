@@ -839,8 +839,7 @@
                 rm(station, index, huc8, huc2, elev, lon, lat, huc_index, drainage)
               }
               
-              # DrainageMiles = Drainage / (2.788*10^7),
-              # DrainageKm = DrainageMiles / (2.59)
+             
               
           # Join them all together
               master <- cbind(peak_swe, data)
@@ -874,10 +873,6 @@
               # Peak Q vs Peak SWE
               plot <- ggplot(master[!(is.na(master$DrainageBinned)),], aes(x = PeakSWE, y = PeakQ, color = Latitude)) + 
                 geom_point(na.rm = TRUE, alpha = 0.7) +
-                # stat_poly_line(data = subset(master[!(is.na(master$DrainageBinned)),], Latitude > 42.5), method = 'lm', se = FALSE, color = 'blue') +
-                # stat_poly_eq(label.y.npc = 0.9,use_label(c("R2")), color = 'blue') +
-                # stat_poly_line(data = subset(master[!(is.na(master$DrainageBinned)),], Latitude < 42.5), method = 'lm', se = FALSE, color = 'red') +
-                # stat_poly_eq(label.y.npc = 0.85, use_label(c("R2")), color = 'red') +
                 facet_wrap(~DrainageBinned, drop = TRUE, scales = 'free') +
                 scale_color_viridis() +
                 labs(x = 'Peak SWE (mm)', y = 'Peak Mean Daily Discharge (m^3/s)', title = 'Peak Q vs Peak SWE: 1980-2022',
@@ -897,7 +892,7 @@
               ggsave(filename = 'PeakQvsPeakSWE.png', width = 12, height = 10, plot, path = path5)
               
               
-              options(scipen=999)
+              options(scipen=999) # Prevent Scientific Notation
               plot <- ggplot(master[!(is.na(master$DrainageBinned)),], aes(x = DrainageBinned, y = PeakQ, fill = DrainageBinned)) + 
                 geom_boxplot(na.rm = TRUE, alpha = 0.7) +
                 labs(x = 'Drainage Basin Area (km^2)', y = 'Peak Mean Daily Discharge (m^3/s)', title = 'Peak Q vs Basin Area: 1980-2022',
@@ -946,9 +941,6 @@
                      axis.text.y = element_text(size = 14))  
              ggsave(filename = 'sample_streamflow_hydrograph.png', width = 12, height = 7, plot, path = path5)
                
-              
-              
-              
 ################################### Snowpack Characteristic Plotting #############################              
               
              # Peak SWE Magnitude vs Date of Peak SWE
@@ -993,13 +985,7 @@
              ggsave(filename = 'OnsetBoxplot.png', width = 12, height = 10, plot, path = path5)
              
 ############################################# Other Plots #################################################
-              
-        
-                
           
-        
-            
-            
             blah <- data.frame(Decade = c('1980', '1990', '2000', '2010'),
                                NDays = 0.02,
                                label = c('Mean = 10.846\nStd. Dev. = 23.734\nSkew = -0.418\nKurtosis = 6.703', 
@@ -1046,408 +1032,26 @@
             
             
             
-            # 5. Peak SWE Magnitude Statistics
-            
-            
-            
-            ggplot(data = master, aes(x = PeakSWE, fill = Decade, group = Decade)) +
-              geom_density(na.rm = TRUE) + 
-              scale_color_identity(name = 'Decade', guide = 'legend', 
-                                   labels = c('1980s', '1990s', '2000s', '2010s')) +
-              facet_wrap(~Decade) +
-              # scale_x_continuous(breaks = c(-125, -100, -75, -50, -25, 0, 25, 50, 75, 100, 125), limits = c(-125, 150)) +
-              guides(color = guide_legend(override.aes = list(alpha = 1, stroke = 0, shape = NA))) + 
-              geom_vline(aes(xintercept = mean(PeakSWE, na.rm = TRUE)), color = 'red') + 
-              labs(x = 'Snow Water Equivalent (mm)', y = 'Density', title = 'Density Distribution of Peak SWE Magnitude',
-                   caption = 'Density Distribution of the magnitude of peak SWE at all 207 SNOTEL stations.<br>Results are separated by decade, where the 1980s ranges from 10-01-1979 through 09-30-1990, and<br>2021 + 2022 are included in the 2010s. The vertical red line represents the sample mean for all stations<br>in all years, with an average magnitude of 489.694 mm') +
-              theme_clean() + 
-              theme(plot.title = element_text(size = 20),
-                    plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                    legend.title = element_text(size = 14), 
-                    legend.text = element_text(size = 11), 
-                    legend.position = 'bottom', 
-                    legend.key.size = unit(1, 'cm'), 
-                    axis.title = element_text(size = 18),
-                    axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1), 
-                    axis.text.y = element_text(size = 14), 
-                    strip.text.x = element_text(size = 14)) +
-              geom_text(data = blah, mapping = aes(x = 2000, y = 0.0015, label = label))
-            
-            # 6. Peak to Snowmelt onset statistics
- 
-            blah <- data.frame(Decade = c('1980', '1990', '2000', '2010'),
-                               NDays = 0.015,
-                               label = c('Mean = 5.061<br>Skew = -0.019<br>Kurtosis = 5.411', 
-                                         'Mean = 6.477<br>Skew = 0.470<br>Kurtosis = 6.911',
-                                         'Mean = 10.950<br>Skew = 0.936<br>Kurtosis = 6.561',
-                                         'Mean = 11.900<br>Skew = 1.154<br>Kurtosis = 7.859'))
-            
-           
-            
-           plot <- ggplot(master, aes(x = PeakSWE, y = PeakQ, color = HUC2)) +
-             geom_point(na.rm = TRUE, alpha = 0.5) +
-             scale_y_continuous(trans = 'log10') +
-             scale_x_continuous(trans = 'log10') +
-             geom_abline() +
-             labs(x = 'Magnitude of Peak SWE (mm)', y = 'Peak Streamflow per HUC8 Area (ft/sec)', title = 'Peak Streamflow vs Peak Snow Water Equivalent', caption = 'Plot of peak discharge per basin area versus the peak snow water equivalent for that year. Here, basin area is the<br>area of the HUC8 that the USGS streamflow gauge corresponds to. Both the x and y axis are on a log10<br>scale, and the colors correspond to the large USGS HUC2 watersheds.') + 
-             theme_clean() + 
-             theme(plot.title = element_text(size = 20),
-                   plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                   legend.title = element_text(size = 14), 
-                   legend.text = element_text(size = 11), 
-                   legend.position = 'bottom', 
-                   legend.key.size = unit(1, 'cm'), 
-                   axis.title = element_text(size = 18),
-                   axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1), 
-                   axis.text.y = element_text(size = 14), 
-                   strip.text.x = element_text(size = 14)) +
-             guides(color = guide_legend(override.aes = list(size = 3, alpha = 1, stroke = 1, shape = 'circle'))) 
-           ggsave(filename = 'peakQ_vs_peakSWE.png', width = 11, height = 8.5, plot, path = path5)
-
-################################################# SNOTEL 363 Box Canyon ########################################
-
-        # 1. PLOT SWE WITH NUMBER OF DAYS BETWEEN PEAK SWE AND DATE OF SNOWMELT ONSET
-              test <- peak_swe[, c('Water_Year', '363')] # Select our station, SNOTEL 363 at Box Canyon, Montana
-              test <- cbind(test, peak_to_onset[colnames(peak_to_onset) == '363' ])
-              colnames(test) <- c('Water_Year', 'SWE', 'Duration')
-              test <- test %>%
-                mutate(across(c('SWE'), ~./10)) %>%# Convert to centimeters so the two y axes line up nicely in the plot
-                mutate(Decade = Water_Year - Water_Year %% 10) %>%
-                relocate(Decade, .after = Water_Year)
-              test$Decade[test$Decade == 1970] <- 1980
-              
-              plot <- ggplot(test) + 
-                geom_bar(mapping = aes(x = Water_Year, y = Duration), stat = 'identity', na.rm = TRUE, fill = 'pink') + 
-                geom_line(mapping = aes(x = Water_Year, y = SWE), stat = 'identity', na.rm = TRUE, color = 'blue', linewidth = 2) + 
-                scale_y_continuous(name = 'Peak SWE (centimeters)', 
-                                   sec.axis = sec_axis(~., name = 'Days from Peak SWE to Snowmelt Onset')) + 
-                labs(x = 'Water Year', title = 'Number of Days from Peak SWE to Snowmelt Onset, Peak SWE Magnitude: 1980-2022',
-                     caption = 'Figure 10: SNOTEL 363, Box Canyon, Montana. Pink bars are the number of days that elapsed each year from the date of the peak SWE <br>to the date of snowmelt onset. Blue line is the magnitude, in centimeters, of peak SWE for each year. <br>Time series comprises each water year from 1980 through 2022.') + 
-                theme(plot.title = element_text(size = 20),
-                      plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                      legend.title = element_text(size = 14), 
-                      legend.text = element_text(size = 11), 
-                      legend.position = 'right', 
-                      legend.key.size = unit(1, 'cm'), 
-                      axis.title = element_text(size = 18),
-                      axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1), 
-                      axis.text.y = element_text(size = 14),
-                      axis.line.y.right = element_line(color = "pink", size = 2), 
-                      axis.ticks.y.right = element_line(color = "pink"),
-                      axis.line.y.left = element_line(color = "blue", size = 2), 
-                      axis.ticks.y.left = element_line(color = "blue"))
-              ggsave(filename = 'Box_Canyon_bars_and_line.png', width = 13, height = 8.5, plot, path = path5)
-              
-              
-        # 2: PLOT PEAK SWE VS DAYS BETWEEN PEAK SWE AND DATE OF SNOWMELT ONSET
-              plot <- ggplot(test, aes(x = SWE, y = Duration)) + 
-                stat_poly_line(se = FALSE) +
-                stat_poly_eq(use_label(c("eq", "R2")), label.x = 'right') +
-                geom_point(aes(color = as.factor(Decade)), na.rm = TRUE, size = 3) + 
-                labs(x = 'Peak Snow Water Equivalent (cm)', y = '# of Days from Peak SWE to Snowmelt Onset',
-                     title = 'Duration from Peak SWE to Snowmelt vs Magnitude of Peak SWE: SNOTEL 363', 
-                     color = 'Decade',
-                     caption = 'Figure 13: Box Canyon, Montana. Duration (in days) between the date of peak SWE and the date of snowmelt onset vs the magnitude of <br>peak SWE. The dots are colored by the decade they represent (each represents a single year), but the linear regression is for the whole <br>dataset. Note that the r-squared of 0.14 suggests a weak correlation between the duration and the peak SWE.') +
-                theme_clean() + 
-                theme(plot.title = element_text(size = 20),
-                      plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                      legend.title = element_text(size = 14), 
-                      legend.text = element_text(size = 11), 
-                      legend.position = 'bottom', 
-                      legend.key.size = unit(1, 'cm'), 
-                      axis.title = element_text(size = 18),
-                      axis.text.x = element_text(size = 14, vjust = 0.9, hjust = 1), 
-                      axis.text.y = element_text(size = 14)) 
-              ggsave(filename = 'Box_Canyon_duration_vs_swe.png', width = 13, height = 8.5, plot, path = path5)
-                
-
-
-        # 2. PLOT DATES OF 20, 50, AND 80% BASEFLOW/SNOWMELT FOR SNOTEL 363
-              
-              # Just replace 'snow' with 'base' to plot the baseflow instead of the streamflow (Command F)
-              test <- snow_20[, c('Water_Year', '10070002')] # Select the HUC that SNOTEL 363 is in
-              test <- cbind(test, snow_50[colnames(snow_50) == '10070002'])
-              test <- cbind(test, snow_80[colnames(snow_80) == '10070002'])
-              colnames(test) <- c('Water_Year', '20', '50', '80')
-              test <- test %>%
-                mutate_if(is.character, as.numeric) # Convert to class numeric
-              mean1 <- mean(test$`20`) # Compute the means of each of the percentiles so it can be plotted as a horizontal line
-              mean2 <- mean(test$`50`)
-              mean3 <- mean(test$`80`)
-              test <- test %>%
-                pivot_longer('20' : '80', names_to = 'Percentile', values_to = 'NDays') # Pivot longer so all three can be plotted at once
-              test$Water_Year <- as.factor(test$Water_Year)
-              test$NDays <- as.numeric(test$NDays)
-              
-              plot <- ggplot(test, aes(x = Water_Year, y = NDays, group = Percentile, color = Percentile)) + 
-                geom_line(linewidth = 2) + 
-                geom_hline(yintercept = mean1, color = '#F8766D') + 
-                geom_hline(yintercept = mean2, color = '#00BA38') + 
-                geom_hline(yintercept = mean3, color = '#619CFF') + 
-                annotate('text', x = c('2003', '2003', '2003'), 
-                         y = c(210, 250, 275), 
-                         label = c('May 12th', 'May 31st', 'June 25th'), 
-                         color = c('#F8766D', '#00BA38', '#619CFF'),
-                         size = 12) + 
-                labs(x = 'Water Year', y = 'Number of Days since start of Water Year (October 1)', 
-                     title = 'Snowmelt Threshold Dates for HUC 10070002 (Yellowstone River, Montana)',
-                     caption = 'Figure 12: Number of days that elapsed before 20%, 50%, and 80% of the snowmelt passed each year on the Yellowstone River, Montana. <br>Colored horizontal lines and text represent the mean for each category. Y-axis is represented as the number of days since the beginning <br>of the water year, October 1.', 
-                     color = 'Percentage of Total Snowmelt for Each Water Year') + 
-                theme(plot.title = element_text(size = 20),
-                      plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                      legend.title = element_text(size = 14), 
-                      legend.text = element_text(size = 11), 
-                      legend.position = 'bottom', 
-                      legend.key.size = unit(1, 'cm'), 
-                      axis.title = element_text(size = 18),
-                      axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1), 
-                      axis.text.y = element_text(size = 14))
-              ggsave(filename = 'Snowmelt_Box_Canyon.png', width = 13, height = 8.5, plot, path = path5)
-
-        # 3. MAP PLOTTING
-              # Just change the set of stations to be plotted
-
-              
-              station_map <- ggplot(us, aes(long, lat, group = group)) +
-                geom_polygon(fill = 'white', color = 'grey50') +
-                geom_sf(data = huc9, color  = '#E41A1C', fill = '#E41A1C', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc10, color  = '#377EB8', fill = '#377EB8', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc11, color  = '#4DAF4A', fill = '#4DAF4A', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc13, color  = '#984EA3', fill = '#984EA3', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc14, color  = '#FF7F00',fill = '#FF7F00',  alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc15, color  = '#FFFF33', fill = '#FFFF33', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc16, color  = '#A65628', fill = '#A65628', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc17, color  = '#F781BF', fill = '#F781BF', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc18, color = '#999999', fill = '#999999', alpha = 0.6, inherit.aes = FALSE) +
-                coord_sf() +
-                geom_point(q_meta, mapping = aes(x = Longitude, y = Latitude, fill = Elevation), inherit.aes = FALSE, size = 3, shape = 25) +
-                labs(x = 'Longitude', y = 'Latitude', title = 'Selected USGS Streamflow Gauges', 
-                     caption = '**Figure 4** Map of final set of USGS streamflow gauges following the application of a 2500-meter<br>elevation filter. SOme gauges are below 2500 meters because the threshold was applied to the<br>SNOTEL stations whose melt can be drained below 2500 meters. Total number of gauges is 69,<br>colored by elevation. Shaded regions are large river basins (HUC2s) that are numbered here.') +
-                theme(plot.title = element_text(size = 20),
-                      plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                      legend.title = element_text(size = 14), 
-                      legend.text = element_text(size = 11), 
-                      legend.position = 'right', 
-                      legend.key.size = unit(1, 'cm')) +
-                geom_label(data = labels, aes(x = longitude, y = latitude, label = label), inherit.aes = FALSE) +
-                scale_fill_viridis('Elevation (m)', option = 'plasma')
-              ggsave(filename = 'final_gauges_2500.png', width = 10, height = 9.5, station_map, path = path5)
-              
-              station_map <- ggplot(us, aes(long, lat, group = group)) +
-                geom_polygon(fill = 'white', color = 'grey50') +
-                geom_sf(data = huc9, color  = '#E41A1C', fill = '#E41A1C', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc10, color  = '#377EB8', fill = '#377EB8', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc11, color  = '#4DAF4A', fill = '#4DAF4A', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc13, color  = '#984EA3', fill = '#984EA3', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc14, color  = '#FF7F00',fill = '#FF7F00',  alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc15, color  = '#FFFF33', fill = '#FFFF33', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc16, color  = '#A65628', fill = '#A65628', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc17, color  = '#F781BF', fill = '#F781BF', alpha = 0.6, inherit.aes = FALSE) +
-                geom_sf(data = huc18, color = '#999999', fill = '#999999', alpha = 0.6, inherit.aes = FALSE) +
-                coord_sf() +
-                geom_point(select_stations, mapping = aes(x = Longitude, y = Latitude, fill = Elevation), inherit.aes = FALSE, size = 5, shape = 25) +
-                labs(x = 'Longitude', y = 'Latitude', title = '6 Select SWE Monitoring Stations', 
-                     caption = 'Figure 7: Map of 6 selected SNOTEL stations following the application of a <br>2000 meter elevation threshold. Colored by elevation. <br>Shaded regions are large river basins (HUC2s) that are numbered here.') +
-                theme(plot.title = element_text(size = 20),
-                      plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                      legend.title = element_text(size = 14), 
-                      legend.text = element_text(size = 11), 
-                      legend.position = 'right', 
-                      legend.key.size = unit(1, 'cm')) +
-                geom_label(data = labels, aes(x = longitude, y = latitude, label = label), inherit.aes = FALSE) +
-                scale_fill_viridis('Elevation (m)', option = 'magma')
-              ggsave(filename = 'select_stations.png', width = 10, height = 9.5, station_map, path = path5)
-              
-              rm(huc9, huc10, huc11, huc13, huc14, huc15, huc16, huc17, huc18)
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
-                      
-                
-################################################ Some Preliminary Results ####################################################
-
-          # Select a few stations that are representative of the whole dataset
-          # 363 Montana 10, 624 Colorado 13, 432 Utah 14, 617 Arizona 15, 534 Idaho 17, 356 California 18
-          select_stations <- swe_meta %>%
-            filter(StationId == 363 | StationId == 624 | StationId == 432 | StationId == 617 | StationId == 534 | StationId == 356)
-
-          # Compute rolling mean and plot with raw discharge for one single USGS gauge
-          test_q <- q %>%
-            dplyr::select(c(1:6, '10080001')) %>%
-            mutate(Rolling = zoo::rollapply(`10080001`, 3, mean, align = 'right', fill = NA)) %>% # Compute three day rolling average
-            pivot_longer('10080001' : 'Rolling', names_to = 'HUC8', values_to = 'Discharge') 
-          
-          test_q <- q %>%
-            dplyr::select(c(1:6, '16050302')) %>%
-            mutate(Rolling = zoo::rollapply(`16050302`, 3, mean, align = 'right', fill = NA)) 
-          test_q$Decade[test_q$Decade == 1970] <- 1980
-          test_q$Date <- as.Date(test_q$Date)
-          plot <- ggplot(test_q %>% filter(Water_Year == 2017), aes(x = Date, y = Rolling)) + 
-            geom_line(linewidth = 1, na.rm = TRUE) +
-            scale_x_date(date_breaks = '6 months', limits = c(ymd(20101001), ymd(20130930))) + 
-            theme(aspect.ratio = 2/10) + 
-            ylim(0, 30000) +
-            labs(x = 'Date', y = 'Discharge (cubic ft/sec)', title = 'Raw and Smoothed Mean Daily Streamflow', 
-                 caption = 'Figure 4: Sample streamflow hydrograph for HUC 17040209 at Yellowstone River, Montana. <br>Dates cover water years 2011 through 2013. Red curve is raw data, blue is <br>smoothed using a 3-day rolling average.') + 
-            theme(plot.title = element_text(size = 20),
-                  plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                  legend.title = element_text(size = 14), 
-                  legend.text = element_text(size = 11), 
-                  legend.position = 'right', 
-                  legend.key.size = unit(1, 'cm'), 
-                  axis.title = element_text(size = 18),
-                  axis.text.x = element_text(size = 14, angle = 30), 
-                  axis.text.y = element_text(size = 14))
-          ggsave(filename = 'sample_hydrograph.png', width = 10, height = 5, plot, path = path5)
-          
-          # Plotting Cumulative Frequency Distributions for Snowmelt onset picks
-          test_q <- q %>%
-            dplyr::select(c(1:6, '10070002')) %>%
-            mutate(Rolling = zoo::rollapply(`10070002`, 3, mean, align = 'right', fill = NA)) %>% # Compute three-day rolling average
-            mutate_if(is.numeric, round, digits = 2) %>%
-            filter(Water_Year == 2022) %>%
-            mutate(cumsum = cumsum(replace_na(Rolling, 0)), # Compute the cumulative percent by day
-                   cumpercent = (cumsum / tail(cumsum, n = 1)) * 100) %>%
-            mutate(across('cumpercent', ~round(., digits = 2))) 
-          t <- temp %>%
-            dplyr::select(c(1:5, '363')) %>%
-            rename(t = '363') %>%
-            filter(Water_Year == 2022) %>%
-            dplyr::select(last_col())
-          test_q <- cbind(test_q, t)
-          s <- swe %>%
-            dplyr::select(c(1:5, '363')) %>%
-            rename(s = '363') %>%
-            filter(Water_Year == 2022) %>%
-            dplyr::select(last_col())
-          test_q <- cbind(test_q, s)
-          plot <- ggplot(test_q, aes(x = Date)) + 
-            geom_line(mapping = aes(y = cumpercent), color = 'black') + 
-            # geom_line(mapping = aes(y = t), color = 'blue', na.rm = TRUE) + 
-            # scale_y_continuous(name = 'Cumulative Percent',
-            #                    sec.axis = sec_axis(~., name="Degrees Celsius", breaks = seq(-35, 30, by = 5))) + 
-            labs(x = 'Date', title = 'Cumulative Frequency Distribution of Streamflow vs Time: Water Year 2022', y = 'Cumulative Percent',
-                 caption = 'Figure 6: Example cumulative frequency distribution of streamflow as measured in HUC8 10070002 and SNOTEL 363. Station and gauge <br>located near the Yellowstone River in Montana. Note the sharp increase that occurs in late May of 2022. <br>This can be identified as the onset of snowmelt for this year.' ) + 
-            scale_x_date(breaks = '2 weeks') + 
-            theme_clean() +
-            theme(plot.title = element_text(size = 20),
-                  plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                  legend.title = element_text(size = 14), 
-                  legend.text = element_text(size = 11), 
-                  legend.position = 'right', 
-                  legend.key.size = unit(1, 'cm'), 
-                  axis.title = element_text(size = 18),
-                  axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1), 
-                  axis.text.y = element_text(size = 14))  
-          #   geom_vline(xintercept = as.Date('2022-04-21'), color = 'red') + 
-          # geom_hline(yintercept = 0, color = 'red') 
-          ggsave(filename = 'cum_freq_ex.png', width = 13, height = 8.5, plot, path = path5)
-          
-          plot <- ggplot(test_q, aes(x = Date, y = s)) + 
-            geom_area(fill = 'grey') + 
-            labs(x = 'Date', y = 'Snow Water Equivalent (millimeters)', title = 'SNOTEL 363 Snowpack (Box Canyon, Montana) for Water Year 2011',
-                 caption = 'Figure 9: Snowpack Hydrograph at Box Canyon, Montana (SNOTEL 363). Note that SWE is measured cumulatively each day, <br>resulting in this gradual increase. The red vertical line indicates the date of peak SWE, identified by eye. <br>Note the steep dropoff in SWE once the melt period begins.') + 
-            theme_clean() + 
-            scale_x_date(breaks = '2 weeks') +
-            theme(plot.title = element_text(size = 20),
-                  plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                  legend.title = element_text(size = 14), 
-                  legend.text = element_text(size = 11), 
-                  legend.position = 'right', 
-                  legend.key.size = unit(1, 'cm'), 
-                  axis.title = element_text(size = 18),
-                  axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1), 
-                  axis.text.y = element_text(size = 14)) +
-            geom_vline(xintercept = as.Date('2013-03-25'), color = 'red') 
-            # geom_label(mapping = aes(x = as.Date('2011-03-01'), y = 75), label = 'Date of Peak SWE: 2011-04-12')
-            ggsave(filename = 'snowpack_hydro.png', width = 14, height = 8.5, plot, path = path5)
-            
-        
-            
-            blah <- q %>%
-              dplyr::select(c(1:6, '10070002')) %>%
-              rename(Q = 7) %>%
-              mutate(Base = gr_baseflow(Q, method = 'lynehollick', a = 0.925, passes = 3)) %>%
-              mutate(Roll1 = zoo::rollapply(Base, 3, mean, align = 'right', fill = NA),
-                     Roll2 = zoo::rollapply(Q, 3, mean, align = 'right', fill = NA))
-            
-        
-            plot <- ggplot(blah) +
-              geom_area(mapping = aes(x = Date, y = Roll2, fill = 'blue')) + 
-              geom_area(mapping = aes(x = Date, y = Roll1, fill = 'pink')) + 
-              scale_x_date(breaks = '2 months', limits = c(ymd(20101001), ymd(20130930))) + 
-              theme(plot.title = element_text(size = 20),
-                    plot.caption = ggtext::element_markdown(size = 14, hjust = 0), 
-                    legend.title = element_text(size = 14), 
-                    legend.text = element_text(size = 11), 
-                    legend.position = 'bottom', 
-                    legend.key.size = unit(1, 'cm'), 
-                    axis.title = element_text(size = 18),
-                    axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1), 
-                    axis.text.y = element_text(size = 14)) + 
-              scale_fill_identity(name = 'Streamflow Type', guide = 'legend', labels = c('Total Streamflow', 'Lyne-Hollick Baseflow')) +
-              labs(x = 'Date', y = 'Daily Mean Streamflow (cubic ft/sec)', title = 'Separated Hydrograph: Baseflow and Snowmelt Flow, Water Years 2011-2013',
-                   caption = 'Separated streamflow hydrograph for HUC10070002, Yellowstone River, Montana. Pink is the baseflow separated using the Lyne-Hollick Method <br>using filtering parameter a = 0.925, with three consecutive passes. Blue is the total daily mean streamflow. <br>Both curves are smoothed with a 3-day rolling average. Note that the baseflow increases to a lesser magnitude as the total streamflow does.') 
-            ggsave(filename = 'sep_streamflow_10070002.png', width = 14, height = 8.5, plot, path = path5)
-          
-          # HUC8 = 10070002, SNOTEL Station 363, Box Canyon, Montana
-          # HUC8 = 13010001, SNOTEL Station 624, Middle Creek, Colorado
-          # HUC8 = 14060004, SNOTEL Station 432, Currant Creek, Utah: TERRIBLE STATION, VERY LITTLE SNOWMELT
-          # HUC8 = 15060101, SNOTEL Station 617, Maverick Fork, Arizona
-          # HUC8 = 17040209, SNOTEL Station 534, Howell Canyon, Idaho
-          # HUC8 = 18040012, SNOTEL Station 356, Blue Lakes, California  
-            
-############################## Discarded Stuff ###############################
-            # # Diff April Onsets for each SNOTEL station that snowmelt onset dates have been picked for
-            # diff_april_onsets <- date_peak_swe %>%
-            #   mutate_if(is.Date, as.character)
-            # for (i in 2:length(date_peak_swe)) {
-            #   index = which(swe_meta$StationId == colnames(date_peak_swe)[i]) # The index in our metadata df that has the correct station
-            #   huc = swe_meta$HUC8[index] # The HUC8 of this selected station
-            #   for (x in 1:length(onsets$Water_Year)) {
-            #     # Compute number of days that have elapsed since the start of the water year for each observation
-            #     col <- which(colnames(onsets) == huc)
-            #     ref <- as.Date(paste0(as.numeric(onsets$Water_Year[x]), '-04-01'))
-            #     diff <- as.integer(difftime(onsets[x, col], ref)) 
-            #     diff_april_onsets[x, i] <- diff
-            #     rm(ref, dif, col)
-            #   }
-            #   rm(index, huc)
-            # }
-            # 
-                
-  
 ############################### Visual Snowmelt Onset Picks Code ########################
             stream <- q %>%
-              dplyr::select(1:6, '14040101') %>%
+              dplyr::select(1:6, '10020004') %>%
               rename(Q = 7) %>%
               mutate(RollQ = zoo::rollapply(Q, 3, mean, align = 'right', fill = NA)) %>%
               mutate(Base = gr_baseflow(Q, method = 'lynehollick', a = 0.925, passes = 3)) 
             snowpack <- swe %>%
-              dplyr::select(c(as.character(swe_meta$StationId[swe_meta$HUC8 == 14040101]))) %>%
+              dplyr::select(c(as.character(swe_meta$StationId[swe_meta$HUC8 == 10020004]))) %>%
               dplyr::select(1) %>%
               rename(SWE = 1) %>%
               mutate(RollSWE = zoo::rollapply(SWE, 3, mean, align = 'right', fill = NA)) %>%
               mutate_if(is.numeric, round, digits = 1)
             t <- temp %>%
-              dplyr::select(c(as.character(swe_meta$StationId[swe_meta$HUC8 == 14040101]))) %>% 
+              dplyr::select(c(as.character(swe_meta$StationId[swe_meta$HUC8 == 10020004]))) %>% 
               dplyr::select(1) %>%
               rename(Temp = 1)
             stream <- cbind(stream, snowpack, t)
             rm(snowpack, t)
-            station <- as.character(swe_meta$StationId[swe_meta$HUC8 == 14040101])[1]
-            huc <- 14040101
+            station <- as.character(swe_meta$StationId[swe_meta$HUC8 == 10020004])[1]
+            huc <- 10020004
             
     
               x = 2020
@@ -1475,7 +1079,7 @@
               p2 <- ggplot(df, aes(x = Date)) +
                 geom_line(mapping = aes(y = RollSWE), color = 'blue') +
                 labs(y = 'Snow Water Equivalent (mm)', title = paste0('3-Day Running Mean SWE: SNOTEL', station, ' HUC', huc)) +
-                geom_vline(aes(xintercept = as.Date('2020-05-09'))) +
+                # geom_vline(aes(xintercept = as.Date('2020-05-09'))) +
                 scale_x_date(date_breaks = '2 weeks') +
                 theme_clean() +
                 theme(panel.grid.major.x = element_line(colour = "gray", linetype = "dotted"),
@@ -1504,8 +1108,8 @@
                       axis.title = element_text(size = 14),
                       axis.title.x = element_blank(),
                       axis.text.x = element_blank(),
-                      axis.text.y = element_text(size = 13)) +
-                geom_vline(aes(xintercept = as.Date('2020-04-20')))
+                      axis.text.y = element_text(size = 13)) 
+                #geom_vline(aes(xintercept = as.Date('2020-04-20')))
               p4 <- ggplot(df, aes(x = Date)) +
                 geom_line(mapping = aes(y = Temp), color = 'red') + 
                 geom_hline(aes(yintercept = 0)) + 
@@ -1524,7 +1128,7 @@
                       axis.text.x = element_text(size = 12, angle = 30, vjust = 0.9, hjust = 1),
                       axis.text.y = element_text(size = 14))
               p <- plot_grid(p2, p3, p1, p4, ncol = 1, nrow = 4, labels = 'AUTO', rel_heights = c(3,3,2.5,4))
-              ggsave(filename = 'panel_plot.png', width = 15, height = 15, p, path = path5)
+              ggsave(filename = 'panel_plot_example4.png', width = 15, height = 15, p, path = path5)
     
             
             
